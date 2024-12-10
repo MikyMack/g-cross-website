@@ -1,0 +1,139 @@
+<!-- views/admin-dashboard.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G-cross</title>
+    <meta name="author" content="G Cross">
+    <meta name="description" content="G Cross">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/logo.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/images/logo.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/logo.png">
+    <style>
+        .pagination-link {
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .pagination-link.active {
+            color: #FF0000;
+        }
+        .pagination-link.normal {
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f9;">
+    <div style="max-width: 1200px; margin: auto; padding: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center;">
+                <img src="/images/logo.png" alt="Logo" style="width: 50px; height: auto; margin-right: 20px;">
+                <h1 style="color: #333;">Admin Dashboard</h1>
+            </div>
+            <div>
+                <a href="/logout" style="color: #ff0000; text-decoration: none;">Logout</a>
+            </div>
+        </div>
+        
+        <!-- Product List -->
+        <h2 style="color: #555;">Product Management For G-Cross</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+            <thead>
+                <tr style="background-color: #007BFF; color: white;">
+                    <th style="padding: 10px; border: 1px solid #ddd;">Index</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Image</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Name</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Category</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Status</th>
+                    <th style="padding: 10px; border: 1px solid #ddd;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% products.forEach((product, index) => { %>
+                    <tr style="background-color: #f9f9f9;">
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><%= index + 1 %></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                            <% product.imageUrls.forEach((imageUrl) => { %>
+                                <img src="<%= imageUrl %>" alt="<%= product.name %>" style="width: 50px; height: auto; margin: 2px;">
+                            <% }) %>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><%= product.name %></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><%= product.category %></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;"><%= product.isListed ? 'Listed' : 'Unlisted' %></td>
+                        <td style="padding: 10px; border: 1px solid #ddd; text-align: center;">
+                            <a href="/admin-dashboard/edit/<%= product._id %>" style="color: #007BFF; text-decoration: none;">Edit</a> |
+                            <a href="/admin-dashboard/delete/<%= product._id %>" style="color: #FF0000; text-decoration: none;">Delete</a> |
+                            <a href="/toggle-product-listing/<%= product._id %>" style="color: #007BFF; text-decoration: none;"><%= product.isListed ? 'Unlist' : 'List' %></a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <div style="text-align: center; margin-top: 20px;">
+            <% if (currentPage > 1) { %>
+                <a href="/admin-dashboard?page=<%= currentPage - 1 %>" class="pagination-link normal">Previous</a>
+            <% } %>
+            <% for (let i = 1; i <= totalPages; i++) { %>
+                <a href="/admin-dashboard?page=<%= i %>" class="pagination-link <%= currentPage === i ? 'active' : 'normal' %>"><%= i %></a>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+                <a href="/admin-dashboard?page=<%= currentPage + 1 %>" class="pagination-link normal">Next</a>
+            <% } %>
+        </div>
+        <h2 style="color: #555;">Add New Product</h2>
+        <button id="toggleButton" onclick="toggleAddProductForm()" style="background-color: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Add Product</button>
+    
+        <form id="addProductForm" action="/admin-dashboard/add" method="POST" enctype="multipart/form-data" style="display: none; background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); margin-top: 20px;">
+            <div style="margin-bottom: 10px;">
+                <label for="productName" style="display: block; margin-bottom: 5px;">Product Name:</label>
+                <input type="text" id="productName" name="name" required style="width: 100%; padding: 8px; box-sizing: border-box; border: none; border-bottom: 2px solid #ccc;">
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label for="productCategory" style="display: block; margin-bottom: 5px;">Category:</label>
+                <select id="productCategory" name="category" required style="width: 100%; padding: 8px; box-sizing: border-box; border: none; border-bottom: 2px solid #ccc;">
+                    <option value="kids">Kids</option>
+                    <option value="mens">Mens</option>
+            </div>
+
+
+            <div style="margin-bottom: 10px;">
+                <label for="productDescription" style="display: block; margin-bottom: 5px;">Description:</label>
+                <textarea id="productDescription" name="description" required style="width: 100%; padding: 8px; box-sizing: border-box; border: none; border-bottom: 2px solid #ccc;"></textarea>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label for="productImageUrls" style="display: block; margin-bottom: 5px;">Image URLs (Upload up to 5 Images):</label>
+                <input type="file" id="productImageUrls" name="imageUrls" accept="image/*" multiple style="width: 100%; padding: 8px; box-sizing: border-box;">
+            </div>
+
+            <button type="submit" style="background-color: #007BFF; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Add Product</button>
+        </form>
+
+      
+    </div>
+</body>
+<script>
+    function toggleAddProductForm() {
+        var form = document.getElementById('addProductForm');
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+</script>
+<script>
+    function toggleAddProductForm() {
+        var form = document.getElementById('addProductForm');
+        var button = document.getElementById('toggleButton');
+        if (form.style.display === 'none' || form.style.display === '') {
+            form.style.display = 'block';
+            button.textContent = 'Cancel';
+        } else {
+            form.style.display = 'none';
+            button.textContent = 'Add Product';
+        }
+    }
+</script>
+</html>
