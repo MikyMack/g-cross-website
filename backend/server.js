@@ -1,6 +1,6 @@
 require('dotenv').config({ path: './backend/.env' });
 const mongoose = require('mongoose');
-const app = require('./app');  // Import your app setup
+const app = require('./app');  
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
